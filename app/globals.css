@@ -1,0 +1,797 @@
+/* 旬やさい相場ナビ — 「平年線」デザインシステム
+ *
+ * 原則: 画面上のあらゆる部品は「1本の基準線」と「そこから直交して伸びる量」の変奏である。
+ * カード・タイル・パネル・ヒーローバナーを作らない。角丸は最大 4px に縛る。
+ * 彩度は原則データ描画にだけ許し、UI クローム（地・文字・罫・リンク）は準無彩色に固定する。
+ */
+
+/* ── トークン ─────────────────────────────────────────────── */
+:root {
+  /* 面と線（クローム：準無彩色） */
+  --bg: hsl(258 24% 98%);
+  --bg-sunken: hsl(258 22% 95.5%);
+  --surface: hsl(0 0% 100%);
+  --line-hair: hsl(258 14% 88%);
+  --line-rule: hsl(258 12% 78%);
+  /* 入力欄・チップ等の「操作できる境界」。装飾罫より濃い（WCAG 1.4.11 の 3:1） */
+  --line-control: hsl(258 12% 58%);
+  --datum: hsl(258 30% 26%); /* 平年線。3px。サイト唯一の太線 */
+
+  /* 文字 */
+  --ink: hsl(258 28% 14%);
+  --ink-2: hsl(258 16% 38%);
+  --ink-3: hsl(258 12% 45%); /* 補助のみ。本文には使わない（沈み面の上でも AA を満たす明度） */
+
+  /* 発散スケール（データ専用） */
+  --dev-high-ink: hsl(66 72% 24%);
+  --dev-high-fill: hsl(66 72% 32%);
+  --dev-mid-ink: hsl(258 16% 38%);
+  --dev-mid-fill: hsl(258 12% 55%);
+  --dev-low-ink: hsl(258 68% 42%);
+  --dev-low-fill: hsl(258 62% 52%);
+  --dev-none: hsl(258 12% 48%);
+  --dev-area-alpha: 0.22;
+
+  --focus: hsl(258 85% 45%);
+
+  /* 寸法 */
+  --w-hair: 1px;
+  --w-rule: 2px;
+  --w-datum: 3px;
+  --r-1: 2px;
+  --r-2: 4px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --measure: 68ch;
+  --wide: 1080px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --tap: 44px;
+
+  /* タイポ */
+  --font-ja: "BIZ UDPGothic", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-ja-emphasis: "BIZ UDGothic", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  /* 数値は等幅数字が要る。webfont は読み込まない（第三者への通信を作らない）ので、
+     字形は環境のUI書体に委ね、桁揃えは font-variant-numeric で担保する。 */
+  --font-num: ui-sans-serif, system-ui, sans-serif;
+
+  --fs-hero: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  --fs-h1: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --fs-h2: 1.375rem;
+  --fs-h3: 1.125rem;
+  --fs-body: 1.0625rem;
+  --fs-sm: 0.9375rem;
+  --fs-xs: 0.8125rem;
+  --fs-num-xl: 2.75rem;
+  --fs-num-l: 1.75rem;
+  --fs-num-m: 1.125rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: hsl(258 24% 9%);
+    --bg-sunken: hsl(258 26% 7%);
+    --surface: hsl(258 22% 13%);
+    --line-hair: hsl(258 16% 22%);
+    --line-rule: hsl(258 16% 30%);
+    --line-control: hsl(258 16% 50%);
+    --datum: hsl(258 26% 78%);
+
+    --ink: hsl(258 22% 94%);
+    --ink-2: hsl(258 14% 72%);
+    --ink-3: hsl(258 12% 58%);
+
+    --dev-high-ink: hsl(66 74% 58%);
+    --dev-high-fill: hsl(66 68% 50%);
+    --dev-mid-ink: hsl(258 14% 72%);
+    --dev-mid-fill: hsl(258 10% 46%);
+    --dev-low-ink: hsl(258 90% 78%);
+    --dev-low-fill: hsl(258 78% 66%);
+    --dev-none: hsl(258 12% 58%);
+    --dev-area-alpha: 0.28;
+
+    --focus: hsl(258 95% 74%);
+  }
+}
+
+/* ── リセット ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  /* URL のような切れ目のない長い文字列でページを横に広げない。 */
+  overflow-wrap: anywhere;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ja);
+  font-size: var(--fs-body);
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 数値は必ず等幅数字。フォールバック時の桁ずれは min-width(ch) 側で吸収する。 */
+.num,
+th,
+td,
+.datum-label {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: 0;
+}
+
+/* ── アクセシビリティ ─────────────────────────────────────── */
+.skip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  text-decoration: underline;
+  transform: translateY(-120%);
+}
+
+.skip:focus {
+  transform: translateY(0);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-1);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a,
+button,
+input,
+select,
+summary,
+label.control {
+  min-height: var(--tap);
+}
+
+.visually-hidden {
+  position: absolute;
+  /* 静的位置に置くと、幅の広い祖先の中では右端に出てページを横に広げうる。 */
+  left: 0;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 骨格 ─────────────────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: var(--tap);
+  padding: 0 var(--gutter);
+  /* サイトの署名である基線を、最初のインクとして出す。 */
+  border-bottom: var(--w-datum) solid var(--datum);
+  background: var(--surface);
+}
+
+.bar__brand {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+.bar__nav {
+  display: flex;
+  gap: var(--sp-4);
+  margin-left: auto;
+  font-size: var(--fs-sm);
+}
+
+.bar__nav a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-bottom: var(--w-hair) solid transparent;
+}
+
+.bar__nav a:hover,
+.bar__nav a:focus-visible {
+  color: var(--ink);
+  border-bottom-color: var(--datum);
+}
+
+.wrap {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.prose {
+  max-width: var(--measure);
+}
+
+.section {
+  padding-block: var(--sp-7);
+  border-top: var(--w-hair) solid var(--line-hair);
+}
+
+.section:first-of-type {
+  border-top: 0;
+}
+
+.section__h {
+  font-size: var(--fs-h2);
+  margin-bottom: var(--sp-4);
+}
+
+.lede {
+  font-size: var(--fs-hero);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  margin-block: var(--sp-3) var(--sp-2);
+}
+
+.meta {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+.foot {
+  border-top: var(--w-rule) solid var(--line-rule);
+  padding-block: var(--sp-6) var(--sp-8);
+  margin-top: var(--sp-8);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  background: var(--bg-sunken);
+}
+
+.foot a {
+  color: var(--ink-2);
+}
+
+.foot__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+/* ── 状態の語彙（色に頼らない：形・符号・語を併用する） ─────── */
+.state {
+  padding-left: var(--sp-2);
+  border-left: var(--w-datum) solid var(--dev-mid-fill);
+  font-weight: 700;
+  color: var(--dev-mid-ink);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+
+.state--cheap {
+  border-left-color: var(--dev-low-fill);
+  color: var(--dev-low-ink);
+}
+
+.state--expensive {
+  border-left-color: var(--dev-high-fill);
+  color: var(--dev-high-ink);
+}
+
+.state--none {
+  border-left-style: dashed;
+  border-left-color: var(--dev-none);
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+/* ── 一覧の行（縦基線） ───────────────────────────────────── */
+.rows {
+  border-top: var(--w-hair) solid var(--line-hair);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(7em, 11em) minmax(6ch, 7ch) minmax(180px, 1fr) 6ch auto;
+  gap: var(--sp-4);
+  align-items: center;
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: var(--w-hair) solid var(--line-hair);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.row:hover,
+.row:focus-visible {
+  background: var(--bg-sunken);
+}
+
+/* ホバー/フォーカスでも「線が増える」— 原型と一貫させる */
+.row:hover::before,
+.row:focus-visible::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--w-datum);
+  background: var(--datum);
+}
+
+.row__name {
+  font-family: var(--font-ja-emphasis);
+  font-weight: 700;
+}
+
+.row__price {
+  text-align: right;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.row__ratio {
+  text-align: right;
+  font-size: var(--fs-num-m);
+  font-weight: 700;
+}
+
+.row__ratio--cheap {
+  color: var(--dev-low-ink);
+}
+
+.row__ratio--expensive {
+  color: var(--dev-high-ink);
+}
+
+.row__ratio--none {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+/* 偏差レーン：中央に縦の基準線、そこから左右へ伸びる */
+.lane {
+  position: relative;
+  height: 20px;
+}
+
+.lane::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  inset-block: 0;
+  width: var(--w-datum);
+  background: var(--datum);
+}
+
+.lane__bar {
+  position: absolute;
+  top: 3px;
+  height: 14px;
+  background: var(--dev-mid-fill);
+}
+
+.lane__bar--cheap {
+  background: var(--dev-low-fill);
+}
+
+.lane__bar--expensive {
+  background: var(--dev-high-fill);
+}
+
+/* バー終端を明示する縦キャップ（薄い塗りでも境界がわかる） */
+.lane__cap {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 20px;
+  background: currentColor;
+}
+
+/* 欠測（調査対象外）の行。中央の実線基線を出すと「平年ちょうど」と同じ絵になるため、
+   基線を消してレーン全幅に点線を渡す。推移図の点網かけと語彙を揃える。 */
+.lane--none::before {
+  display: none;
+}
+
+.lane__dash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px dashed var(--dev-none);
+}
+
+.lane-scale {
+  display: grid;
+  grid-template-columns: minmax(7em, 11em) minmax(6ch, 7ch) minmax(180px, 1fr) 6ch auto;
+  gap: var(--sp-4);
+  padding: 0 var(--sp-3) var(--sp-1);
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+.lane-scale__marks {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ── 図版 ─────────────────────────────────────────────────── */
+.figure {
+  margin: 0;
+}
+
+.figure__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure details {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+}
+
+.figure summary {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--ink-2);
+  text-decoration: underline;
+}
+
+/* 表は列が多いと画面幅を超える。ページごと横に流さず、この枠の中だけで横スクロールさせる。
+   max-width を明示しないと、中の table(width:100%) の min-content 幅に押し広げられる。 */
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  /* 位置指定を持たないと、中の position:absolute な要素（visually-hidden の caption 等）の
+     包含ブロックが文書全体になり、この枠のクリップから抜けてページを横に広げてしまう。 */
+  position: relative;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--fs-sm);
+}
+
+th,
+td {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: var(--w-hair) solid var(--line-hair);
+  text-align: right;
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+  /* 1列目は品目名などの日本語。数値用の書体に引きずられないよう戻す。 */
+  font-family: var(--font-ja);
+}
+
+thead th {
+  border-bottom: var(--w-rule) solid var(--line-rule);
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+/* ── 直売所メモ（従属機能） ───────────────────────────────── */
+.memo {
+  margin-top: var(--sp-8);
+  padding: var(--sp-5) var(--gutter) var(--sp-6);
+  background: var(--bg-sunken);
+  border-top: var(--w-rule) solid var(--line-rule);
+}
+
+.memo__h {
+  font-size: var(--fs-h3);
+  margin-bottom: var(--sp-2);
+}
+
+.memo__note {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--sp-4);
+  max-width: var(--measure);
+}
+
+.memo__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--sp-3);
+  align-items: end;
+  margin-bottom: var(--sp-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.field label {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  min-height: auto;
+}
+
+.field input {
+  min-height: var(--tap);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--w-hair) solid var(--line-control);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-body);
+}
+
+.field input:disabled {
+  background: var(--bg-sunken);
+  color: var(--ink-3);
+}
+
+.btn {
+  min-height: var(--tap);
+  padding: var(--sp-2) var(--sp-5);
+  border: var(--w-rule) solid var(--datum);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.btn:disabled {
+  border-color: var(--line-control);
+  color: var(--ink-3);
+  cursor: not-allowed;
+}
+
+.btn--quiet {
+  border-width: var(--w-hair);
+  border-color: var(--line-control);
+  font-weight: 400;
+  padding-inline: var(--sp-3);
+}
+
+.memo__error {
+  color: var(--dev-high-ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.memo__empty {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  max-width: var(--measure);
+}
+
+/* ── データ鮮度の警告帯 ───────────────────────────────────── */
+.stale {
+  padding: var(--sp-2) var(--gutter);
+  background: color-mix(in srgb, var(--dev-high-fill) 14%, var(--bg));
+  border-bottom: var(--w-hair) solid var(--dev-high-fill);
+  color: var(--dev-high-ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+/* ── 狭い画面 ─────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name  ratio"
+      "lane  lane"
+      "price state";
+    row-gap: var(--sp-2);
+    padding-block: var(--sp-3);
+  }
+
+  .row__name {
+    grid-area: name;
+  }
+  .row__ratio {
+    grid-area: ratio;
+  }
+  .lane {
+    grid-area: lane;
+  }
+  .row__price {
+    grid-area: price;
+    text-align: left;
+  }
+  .row .state {
+    grid-area: state;
+    justify-self: end;
+  }
+
+  .lane-scale {
+    display: none;
+  }
+}
+
+/* 主図は広い画面＝横基線、狭い画面＝縦基線に差し替える（横スクロールを作らない） */
+.figure__svg--narrow {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .figure__svg--wide {
+    display: none;
+  }
+  .figure__svg--narrow {
+    display: block;
+  }
+}
+
+/* 調査対象外グループ（一覧の末尾に独立して置く） */
+.offseason__h {
+  font-size: var(--fs-h3);
+  margin-top: var(--sp-6);
+  color: var(--ink-2);
+}
+
+.offseason__note {
+  margin-bottom: var(--sp-3);
+  max-width: var(--measure);
+}
+
+/* 今週の値ではない行。安い／高いを色で主張しない。 */
+.lane__bar--none {
+  background: var(--dev-none);
+}
+
+.lane__cap--none {
+  color: var(--dev-none);
+}
+
+.lane__cap--cheap {
+  color: var(--dev-low-ink);
+}
+.lane__cap--normal {
+  color: var(--dev-mid-ink);
+}
+.lane__cap--expensive {
+  color: var(--dev-high-ink);
+}
+
+/* チップ（月・品目への導線） */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: var(--w-hair) solid var(--line-control);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+}
+
+.chip:hover,
+.chip:focus-visible {
+  border-color: var(--datum);
+  border-left-width: var(--w-datum);
+}
+
+/* 品目ページ末尾の簡易ナビ行 */
+.row--compact {
+  grid-template-columns: 1fr auto;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+  line-height: 1.4;
+  margin-bottom: var(--sp-2);
+}
+
+.prose h2 {
+  margin-top: var(--sp-6);
+}
+
+.prose p {
+  margin-bottom: var(--sp-4);
+  max-width: var(--measure);
+}
+
+/* 月別ページの行（一覧行から「判定」列を除いた4列版） */
+.row--month,
+.lane-scale--month {
+  grid-template-columns: minmax(7em, 11em) minmax(6ch, 8ch) minmax(180px, 1fr) 6ch;
+}
+
+@media (max-width: 720px) {
+  .row--month {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name  ratio"
+      "lane  lane"
+      "price price";
+  }
+}
