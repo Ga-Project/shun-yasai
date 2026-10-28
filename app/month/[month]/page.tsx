@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { pageMetadata } from "@/app/site";
 import { DeviationLane } from "@/components/DeviationLane";
 import { itemsCheapInMonth, source } from "@/lib/data";
 import { BAND_LABEL, bandOf, formatPrice, signedPercent } from "@/lib/logic";
@@ -17,10 +18,11 @@ export async function generateMetadata({
   params: Promise<{ month: string }>;
 }): Promise<Metadata> {
   const { month } = await params;
-  return {
+  return pageMetadata({
     title: `${Number(month)}月に安い野菜`,
     description: `${Number(month)}月に例年安くなる野菜を、農林水産省の公的統計の月別平均価格から並べています。`,
-  };
+    path: `month/${Number(month)}/`,
+  });
 }
 
 export default async function MonthPage({ params }: { params: Promise<{ month: string }> }) {

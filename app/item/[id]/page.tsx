@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { pageMetadata } from "@/app/site";
 import { DatumPlot } from "@/components/DatumPlot";
 import { MonthBand } from "@/components/MonthBand";
 import { PriceLine } from "@/components/PriceLine";
@@ -33,13 +34,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const item = itemById(id);
-  if (!item) return { title: "見つかりません" };
+  if (!item) return { title: "見つかりません", robots: { index: false } };
   const latest = latestOf(item);
   const headline = headlineFor(item.name, latest);
-  return {
+  return pageMetadata({
     title: headline,
     description: `${item.name}の小売価格と平年比を、農林水産省の公的統計から確認できます。例年安くなる月もあわせて掲載しています。`,
-  };
+    path: `item/${item.id}/`,
+  });
 }
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {

@@ -55,11 +55,12 @@ jobs:
       # 取り込みが壊れたデータをそのまま公開できてしまう。
       - run: pnpm typecheck
       - run: pnpm lint
-      - run: pnpm test
+      # build を先に回す: test/seo.test.mjs が書き出した out/ を検査する。
       - run: pnpm build
         env:
           # Pages はサブパス配信なので、ここでだけ basePath を与える。
           NEXT_PUBLIC_BASE_PATH: /shun-yasai
+      - run: pnpm test
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
