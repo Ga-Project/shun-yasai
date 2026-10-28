@@ -4,13 +4,12 @@ import { SITE_URL } from "@/app/site";
 import { DatumPlot } from "@/components/DatumPlot";
 import { ItemRows } from "@/components/ItemRows";
 import { latestAll, latestWeek, source } from "@/lib/data";
-import { deviationPercent, formatWeek, signedPercent } from "@/lib/logic";
+import { MONTHS, deviationPercent, formatWeek, signedPercent } from "@/lib/logic";
 
 // canonical は layout に置かない（404 など他ページが「トップが正」と名乗ってしまう）。
 // タイトル・共有カードは layout の既定を使うので、ここで足すのは canonical だけ。
 export const metadata: Metadata = { alternates: { canonical: SITE_URL } };
 
-const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function Home() {
   const rows = latestAll();

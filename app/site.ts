@@ -6,6 +6,11 @@ import type { Metadata } from "next";
 // 画像だけ 404 になる、といったズレ方をする。全員がこの定数を見る。
 // 末尾スラッシュが混ざると "...//og.png" になるので落とす。
 const BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
+// 先頭スラッシュ無し・二重スラッシュ等の崩れた値で、別サイトを指す URL を黙って作らない。
+// 未設定は許す（ローカル確認はルート配信）。Pages の CI は /shun-yasai を与え、test が検査する。
+if (BASE_PATH !== "" && !/^\/[a-z0-9-]+$/.test(BASE_PATH)) {
+  throw new Error(`NEXT_PUBLIC_BASE_PATH が不正です: ${JSON.stringify(BASE_PATH)}`);
+}
 
 /** 末尾スラッシュ付きの公開 URL（例: https://ga-project.github.io/shun-yasai/）。 */
 export const SITE_URL = `https://ga-project.github.io${BASE_PATH}/`;

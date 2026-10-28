@@ -4,9 +4,7 @@ import { notFound } from "next/navigation";
 import { pageMetadata } from "@/app/site";
 import { DeviationLane } from "@/components/DeviationLane";
 import { itemsCheapInMonth, source } from "@/lib/data";
-import { BAND_LABEL, bandOf, formatPrice, signedPercent } from "@/lib/logic";
-
-const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+import { BAND_LABEL, MONTHS, bandOf, formatPrice, signedPercent } from "@/lib/logic";
 
 export function generateStaticParams() {
   return MONTHS.map((month) => ({ month: String(month) }));
