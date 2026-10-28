@@ -20,6 +20,9 @@ export type Item = {
  */
 export type Band = "cheap" | "normal" | "expensive";
 
+/** 月ページの月（1〜12）。月ページ・サイトマップ・トップの月リンクが同じ配列を見る。 */
+export const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
 export const BAND_THRESHOLD = { cheap: 0.95, expensive: 1.05 } as const;
 
 export const BAND_LABEL: Record<Band, string> = {

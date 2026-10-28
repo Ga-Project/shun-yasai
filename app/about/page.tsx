@@ -1,14 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/site";
 import { BAND_THRESHOLD } from "@/lib/logic";
 import { items, latestWeek, source } from "@/lib/data";
 import { formatWeek } from "@/lib/logic";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "この数字の読み方",
   description:
     "旬やさい相場ナビが使っているデータの出典と、平年比の意味、価格の単位、調査対象外の扱いについて説明します。",
-};
+  path: "about/",
+});
 
 export default function AboutPage() {
   return (

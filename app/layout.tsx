@@ -5,13 +5,14 @@ import "./globals.css";
 import { StaleNotice } from "@/components/StaleNotice";
 import { latestWeek, source } from "@/lib/data";
 import { formatWeek } from "@/lib/logic";
+import { OG_ALT, OG_IMAGE, SITE_URL } from "./site";
 
 const SITE = "旬やさい相場ナビ";
 const DESCRIPTION =
   "野菜の値段が平年に比べて安いか高いかを、農林水産省の公的統計から毎週の数字で確かめられます。";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ga-project.github.io/shun-yasai/"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `${SITE} — 野菜の値段は平年より高い？安い？`,
     template: `%s | ${SITE}`,
@@ -23,13 +24,36 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     siteName: SITE,
+    url: SITE_URL,
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE} — 野菜の値段は平年より高い？安い？`,
+    description: DESCRIPTION,
+    images: [{ url: OG_IMAGE, alt: OG_ALT }],
+  },
+};
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE,
+  url: SITE_URL,
+  description: DESCRIPTION,
+  inLanguage: "ja",
+  image: OG_IMAGE,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
       <body>
+        {/* 構造化データ。"<" を \u003c にして </script> の混入で閉じられないようにする。 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c") }}
+        />
         {/* アクセス解析（cookieless・秘密キー不要）: 全プロダクト共通の単一 GoatCounter サイト
             「ga-project」に集約する。製品ごとの数値は path（/shun-yasai/）で区別されるので、
             GoatCounter 側でサイトを新規作成しない＝新プロダクトは自動で ga-project の新パスとして計測される。 */}

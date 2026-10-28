@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "プライバシーポリシー",
   description: "旬やさい相場ナビにおける、アクセス解析と端末内保存の扱いについて説明します。",
-};
+  path: "privacy/",
+});
 
 export default function PrivacyPage() {
   return (
