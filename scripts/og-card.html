@@ -3,30 +3,28 @@
 <style>
   html,body{margin:0;width:1200px;height:630px;overflow:hidden}
   body{background:hsl(258 24% 98%);color:hsl(258 28% 14%);font-family:"BIZ UDPGothic","Hiragino Sans","Noto Sans JP",sans-serif;position:relative}
-  .name{position:absolute;left:72px;top:64px;font-size:34px;letter-spacing:.04em;color:hsl(258 16% 38%)}
-  h1{position:absolute;left:72px;top:118px;margin:0;width:1056px;font-size:84px;line-height:1.25;font-weight:700}
-  .datum{position:absolute;left:72px;right:72px;top:470px;height:3px;background:hsl(258 30% 26%)}
-  .lab{position:absolute;left:72px;top:488px;font-size:30px;color:hsl(258 16% 38%)}
-  .lab.r{left:auto;right:72px}
-  .bar{position:absolute;width:44px;bottom:160px;background:hsl(258 62% 52%)}
-  .bar.up{top:auto;bottom:auto;background:hsl(66 72% 32%)}
-  .src{position:absolute;left:72px;bottom:36px;font-size:28px;color:hsl(258 12% 45%)}
+  .name{position:absolute;left:72px;top:48px;font-size:46px;font-weight:700;color:hsl(258 16% 38%)}
+  h1{position:absolute;left:72px;top:112px;margin:0;width:1056px;font-size:84px;line-height:1.2;font-weight:700;font-feature-settings:"palt"}
+  .datum{position:absolute;left:72px;right:72px;top:452px;height:3px;background:hsl(258 30% 26%)}
+  .lab{position:absolute;font-size:36px;font-weight:700}
+  .hi{color:hsl(66 72% 24%)} .lo{color:hsl(258 68% 42%)} .mid{color:hsl(258 16% 38%)}
+  .bar{position:absolute;width:64px}
+  .foot{position:absolute;left:72px;bottom:30px;font-size:36px;color:hsl(258 12% 45%)}
+  .note{position:absolute;right:72px;bottom:32px;font-size:28px;color:hsl(258 12% 45%)}
 </style></head><body>
 <div class="name">旬やさい相場ナビ</div>
 <h1>野菜の値段は、<br>平年より高い？安い？</h1>
 <div class="datum"></div>
-<!-- 平年線(基準)からの直交する量。下=安い(青紫) / 上=高い(黄緑) -->
-<div class="bar" style="left:94px;top:473px;height:62px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:182px;top:422px;height:48px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="bar" style="left:270px;top:473px;height:30px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:358px;top:400px;height:70px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="bar" style="left:446px;top:473px;height:12px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:534px;top:436px;height:34px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="bar" style="left:622px;top:473px;height:48px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:710px;top:448px;height:22px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="bar" style="left:798px;top:473px;height:70px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:886px;top:414px;height:56px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="bar" style="left:974px;top:473px;height:20px;bottom:auto;background:hsl(258 62% 52%)"></div>
-<div class="bar" style="left:1062px;top:430px;height:40px;bottom:auto;background:hsl(66 72% 32%)"></div>
-<div class="src">農林水産省の公的統計を毎週の数字で</div>
+<div class="lab mid" style="left:72px;top:462px">平年</div>
+<div class="lab hi" style="right:72px;top:386px">高い ↑</div>
+<div class="lab lo" style="right:72px;top:462px">安い ↓</div>
+<!-- 平年線からの量。上=高い(黄緑) / 下=安い(青紫)。図はイメージで実データではない -->
+<div class="bar" style="left:240px;top:395px;height:57px;background:hsl(66 72% 32%)"></div>
+<div class="bar" style="left:360px;top:458px;height:30px;background:hsl(258 62% 52%)"></div>
+<div class="bar" style="left:480px;top:340px;height:112px;background:hsl(66 72% 32%)"></div>
+<div class="bar" style="left:600px;top:458px;height:62px;background:hsl(258 62% 52%)"></div>
+<div class="bar" style="left:720px;top:458px;height:26px;background:hsl(258 62% 52%)"></div>
+<div class="bar" style="left:840px;top:410px;height:42px;background:hsl(66 72% 32%)"></div>
+<div class="foot">農林水産省の公的統計をもとに毎週更新</div>
+<div class="note">図はイメージ</div>
 </body></html>
